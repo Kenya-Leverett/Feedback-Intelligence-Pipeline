@@ -24,7 +24,7 @@ Configure the following Script Properties within Google Apps Script (Extensions 
 ____________________________________________________________________________________________  
   **Property Key** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - **Description** - &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **Example / Placeholder**      
   GEMINI_API_KEY &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Google AI Studio API Key - &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{GEMINI_API_KEY}      
-  SLACK_WEBHOOK_URL - Incoming Webhook URL for Slack channel - {SLACK_WEBHOOK_URL}    
+  SLACK_WEBHOOK_URL - Incoming URL for channel - {SLACK_WEBHOOK_URL}    
 ____________________________________________________________________________________________
     
 
