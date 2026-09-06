@@ -1,0 +1,138 @@
+/**
+ * Main VoC Engine Trigger (Runs weekly via Apps Script Time-Driven Trigger)
+ * Scans Google Sheets for unprocessed rows, runs Gemini analysis, and posts to Slack.
+ */
+function runVoCFeedbackPipeline() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Feedback_Log");
+  const data = sheet.getDataRange().getValues();
+  
+  const unprocessedRows = [];
+  const rowIndices = [];
+
+  // Collect rows where AI_Processed (Col F) == FALSE and text is valid
+  for (let i = 1; i < data.length; i++) {
+    const aiProcessed = data[i][5]; // Column F
+    const rawText = data[i][4];     // Column E
+
+    if (aiProcessed.toString().toUpperCase() === "FALSE" && rawText !== "IGNORE_INSUFFICIENT_DATA") {
+      unprocessedRows.push({
+        rowIndex: i + 1,
+        sourceType: data[i][1],
+        dealSize: data[i][2],
+        industry: data[i][3],
+        rawText: rawText
+      });
+      rowIndices.push(i + 1);
+    }
+  }
+
+  if (unprocessedRows.length === 0) {
+    Logger.log("No new unprocessed feedback entries found.");
+    return;
+  }
+
+  // Send batch payload to Gemini API
+  const geminiResults = analyzeFeedbackWithGemini(unprocessedRows);
+
+  if (!geminiResults || !geminiResults.analyzed_entries) {
+    Logger.log("Failed to process batch with Gemini API.");
+    return;
+  }
+
+  // Update Google Sheet with AI results and set AI_Processed = TRUE
+  geminiResults.analyzed_entries.forEach((entry, index) => {
+    const targetRow = rowIndices[index];
+    sheet.getRange(targetRow, 6).setValue("TRUE");               // Col F: State flag
+    sheet.getRange(targetRow, 7).setValue(entry.normalizedSummary); // Col G: Normalized Problem
+    sheet.getRange(targetRow, 8).setValue(entry.category);          // Col H: Master Category
+    sheet.getRange(targetRow, 9).setValue(entry.directQuote);        // Col I: Verbatim Quote
+  });
+
+  // Post weekly digest to Slack
+  sendSlackNotification(geminiResults.weekly_executive_summary, geminiResults.top_overlaps);
+}
+
+/**
+ * Calls Gemini 2.0 Flash API using JSON Schema mode to guarantee structured output.
+ */
+function analyzeFeedbackWithGemini(feedbackItems) {
+  const apiKey = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+  // Master taxonomy list to prevent category drift
+  const masterCategories = [
+    "Integrations & APIs", 
+    "UX & Onboarding", 
+    "Performance & Latency", 
+    "Billing & Pricing", 
+    "Reporting & Analytics", 
+    "Feature Gap"
+  ];
+
+  const systemPrompt = `You are a Technical SaaS Product Consultant analyzing customer feedback from Salesforce (Prospects) and Zendesk (Active Clients).
+Your goal is to normalize messy complaints into standard terms, extract high-impact quotes, and highlight commonalities.
+
+STRICT RULES:
+1. "category" MUST be chosen ONLY from this list: ${JSON.stringify(masterCategories)}.
+2. "normalizedSummary" MUST be a neutral 3-6 word canonical issue label (e.g., "Custom REST API Mapping Failure").
+3. "directQuote" MUST be an EXACT verbatim substring from the raw feedback.`;
+
+  // Configure request payload with OpenAPI response schema enforcement
+  const payload = {
+    "contents": [{
+      "parts": [{ "text": `Analyze the following dataset:\n${JSON.stringify(feedbackItems)}` }]
+    }],
+    "systemInstruction": {
+      "parts": [{ "text": systemPrompt }]
+    },
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "OBJECT",
+        "properties": {
+          "analyzed_entries": {
+            "type": "ARRAY",
+            "items": {
+              "type": "OBJECT",
+              "properties": {
+                "category": { "type": "STRING" },
+                "normalizedSummary": { "type": "STRING" },
+                "directQuote": { "type": "STRING" }
+              },
+              "required": ["category", "normalizedSummary", "directQuote"]
+            }
+          },
+          "weekly_executive_summary": { "type": "STRING" },
+          "top_overlaps": {
+            "type": "ARRAY",
+            "items": {
+              "type": "OBJECT",
+              "properties": {
+                "issue": { "type": "STRING" },
+                "impact": { "type": "STRING" }
+              },
+              "required": ["issue", "impact"]
+            }
+          }
+        },
+        "required": ["analyzed_entries", "weekly_executive_summary", "top_overlaps"]
+      }
+    }
+  };
+
+  const options = {
+    "method": "post",
+    "contentType": "application/json",
+    "payload": JSON.stringify(payload),
+    "muteHttpExceptions": true
+  };
+
+  const response = UrlFetchApp.fetch(url, options);
+  const json = JSON.parse(response.getContentText());
+  
+  if (json.candidates && json.candidates[0].content.parts[0].text) {
+    return JSON.parse(json.candidates[0].content.parts[0].text);
+  }
+  return null;
+}
+
