@@ -1,0 +1,8 @@
+// Zendesk Webhook Trigger Payload (Trigger: Ticket Status = Solved)
+{
+  "ticket_id": "{{ticket.id}}",
+  "source_type": "Client (Zendesk)",
+  "deal_size_arr": "{{ticket.organization.custom_fields.{ZENDESK_ARR_FIELD_KEY}}}",
+  "industry": "{{ticket.organization.custom_fields.{ZENDESK_INDUSTRY_FIELD_KEY}}}",
+  "raw_text": "{{ticket.description}}"
+}
