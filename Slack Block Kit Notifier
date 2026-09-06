@@ -1,0 +1,61 @@
+/**
+ * Formats and posts the weekly executive summary to Slack via Incoming Webhook.
+ */
+function sendSlackNotification(summaryText, overlaps) {
+  const webhookUrl = PropertiesService.getScriptProperties().getProperty("SLACK_WEBHOOK_URL");
+  
+  // Build bulleted list of prospect vs. client overlaps
+  let overlapListText = "";
+  overlaps.forEach(item => {
+    overlapListText += `• *${item.issue}*: ${item.impact}\n`;
+  });
+
+  // Construct Block Kit message layout
+  const slackPayload = {
+    "blocks": [
+      {
+        "type": "header",
+        "text": {
+          "type": "plain_text",
+          "text": "📊 Weekly Voice of Customer (VoC) Intelligence Digest",
+          "emoji": true
+        }
+      },
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": `*Executive Summary:*\n${summaryText}`
+        }
+      },
+      { "type": "divider" },
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": `*🔥 Top Prospect vs. Active Client Overlaps:*\n${overlapListText}`
+        }
+      },
+      { "type": "divider" },
+      {
+        "type": "context",
+        "elements": [
+          {
+            "type": "mrkdwn",
+            "text": "💡 _Investigate quotes and ARR impact in the Google Sheets database._"
+          }
+        ]
+      }
+    ]
+  };
+
+  const options = {
+    "method": "post",
+    "contentType": "application/json",
+    "payload": JSON.stringify(slackPayload),
+    "muteHttpExceptions": true
+  };
+
+  UrlFetchApp.fetch(webhookUrl, options);
+}
+
