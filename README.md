@@ -2,20 +2,7 @@
 
 An automated data processing and intelligence engine designed for SaaS technical consulting and product leadership teams. The pipeline bridges pre-sales friction (Salesforce Closed-Lost Deals) and post-sales friction (Zendesk Support Tickets) by aggregating raw feedback, normalizing unstructured complaints into canonical categories, extracting verbatim quotes with metadata, and surfacing cross-segment summaries to Slack.
 
-📑 Table of Contents
-Repository Structure
-System Architecture
-Environment & Credentials
-Deployment & Setup Guide
-Code & Configuration Reference
-1. Zapier Input Sanitization
-2. Salesforce Webhook Payload
-3. Zendesk Trigger Payload
-4. Core Pipeline & Gemini Integration
-5. Slack Block Kit Notifier
-Development Prompt History
-
-📁 Repository Structure
+📁 **Repository Structure**
 ├── src/
 │   ├── zapier/
 │   │   └── clean_input_text.js          # Ingestion sanitization & PII scrubber
