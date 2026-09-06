@@ -4,7 +4,7 @@
  */
 function runVoCFeedbackPipeline() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Feedback_Log");
-  const data = sheet.getDataRange().getValues();
+  const data = sheet.getDataRange().getValues();  
   
   const unprocessedRows = [];
   const rowIndices = [];
