@@ -1,0 +1,9 @@
+1. Create a prompt that describes a system/project that reviews survey results (lost opportunities) and support tickets. It should summarize feedback into categories, provide direct quotes, & make notes of commonalities between frustrations of prospective clients and existing clients.  
+2. Rewrite the code to optimize for these clarifications: clarifications in mind: The CRM is salesforce, the ticketing system is zendesk and the connection is through zapier. Direct quotes (along with metadata like deal size, industry, etc) are available upon investigation of a category. The output is a slack webhook into a new channel (for this purpose), showing summaries and trends.  
+3. The project Storage & Indexing section is happening via  PostgreSQL + Vector Databases? Explain the pros and cons for switching to a free medium like Google Sheets.   
+4. rewrite the project Storage & Indexing section for google sheets.  
+5. regarding the Categorisation & Tagging Engine, would gemini be able to summarize the feedback into more generic language so that querying would be better and commonalities would be easier to point out (direct quotes would be stored as well)?  
+6. Let's start building this project. Lets create the code needed for zapier, then salesforce, then zendesk, then google sheets, then gemini api, then slack webhooks. List any non code related steps first (for each associated platform). WHenever you don't have the information needed, add a placeholder (ex: {zapier api token# here}). List any actions you are unable to do.  
+7. Create documentation for this project (optimize the design for a github page) based on this conversation. Create a page with the list of each prompt used in this conversation. Make sure to create a document for each javascript snippet and code.  
+8. What are some of the challenges with building this project? What challenges are most likely to occur within the first 6 months? how can this project be scaled/improved?   
+
