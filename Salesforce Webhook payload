@@ -1,0 +1,9 @@
+// Salesforce Flow Payload (Trigger: Opportunity Closed Lost)
+{
+  "opportunity_id": "{SALESFORCE_OPPORTUNITY_ID}",
+  "opportunity_name": "{SALESFORCE_OPPORTUNITY_NAME}",
+  "source_type": "Prospect (Salesforce)", // Distinguishes pre-sales vs post-sales friction
+  "deal_size_arr": "{SALESFORCE_OPPORTUNITY_AMOUNT}",
+  "industry": "{SALESFORCE_ACCOUNT_INDUSTRY}",
+  "raw_text": "{SALESFORCE_LOSS_DESCRIPTION_C}"
+}
