@@ -1,0 +1,29 @@
+// Zapier Code Action: Sanitizes inputs & redacts PII before writing to Google Sheets
+
+// Map incoming webhook variables with safe fallbacks
+const rawText = inputData.rawText || "";
+const sourceType = inputData.sourceType || "Unknown";
+const dealSize = inputData.dealSize || "0";
+const industry = inputData.industry || "N/A";
+
+// Strip basic PII (emails, phone numbers, URLs) and normalize whitespace
+let cleanedText = rawText
+  .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[EMAIL_REDACTED]")
+  .replace(/(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/g, "[PHONE_REDACTED]")
+  .replace(/https?:\/\/\S+/g, "[URL_REDACTED]")
+  .replace(/[\r\n]+/g, " ")
+  .trim();
+
+// Skip short or junk entries (<15 chars) to conserve Gemini API tokens
+const isValid = cleanedText.length >= 15;
+
+output = {
+  cleanedText: isValid ? cleanedText : "IGNORE_INSUFFICIENT_DATA",
+  sourceType,
+  dealSize,
+  industry,
+  dateLogged: new Date().toISOString().split('T')[0],
+  aiProcessed: "FALSE" // Boolean state flag for scheduled batch processing
+};
+
+
